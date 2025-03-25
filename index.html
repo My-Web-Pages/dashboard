@@ -2,867 +2,760 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Concerns Dashboard</title>
-    <!-- Include jsMind CSS -->
-    <link rel="stylesheet" type="text/css" href="style/jsmind.css">
-    <!-- Include D3.js -->
-    <script src="js/d3.min.js"></script>
-    <!-- Include marked.js for Markdown parsing -->
-    <script src="js/marked.min.js"></script>
-    <!-- Include jsMind JS -->
-    <script src="js/jsmind.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CohesiveGov Initiatives Dashboard</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; }
-        .left-panel { width: 250px; padding: 20px; background-color: #f0f0f0; overflow-y: auto; }
-        .main-panel { flex-grow: 1; padding: 20px; overflow: auto; }
-        .node { cursor: pointer; }
-        .node circle { stroke-width: 3px; }
-        .node text { font: 12px sans-serif; }
-        .link { fill: none; stroke: #ccc; stroke-width: 2px; }
-        /* Styles for the checkbox container */
-        #tagContainer {
-            max-height: 700px;
-            overflow-y: auto;
-            margin-bottom: 10px;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --text-color: #333;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #2980b9;
         }
-        #tagContainer label {
-            display: block;
-            margin-bottom: 5px;
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .context-menu { position: absolute; background-color: #f9f9f9; border: 1px solid #ccc; padding: 5px 0; z-index: 1000; }
-        .context-menu div { padding: 5px 20px; cursor: pointer; }
-        .context-menu div:hover { background-color: #f0f0f0; }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            line-height: 1.6;
         }
-
-        .modal-content {
-            position: relative;
-            background-color: #fff;
-            margin: 2% auto;
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
             padding: 20px;
-            width: 90%;
-            max-width: 1200px;
-            overflow-y: auto; /* Ensure content is scrollable */
-            max-height: 90%;
-            border-radius: 5px;
+            transition: all 0.3s;
+            overflow-y: auto;
         }
-
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 30px;
+        
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .filter-section {
+            margin-bottom: 20px;
+        }
+        
+        .filter-section h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-intro {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .status-planned {
+            background-color: var(--warning-color);
+        }
+        
+        .status-in-progress {
+            background-color: var(--info-color);
+        }
+        
+        .status-completed {
+            background-color: var(--success-color);
+        }
+        
+        /* Table View Styles */
+        .initiatives-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .initiatives-table th, 
+        .initiatives-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+        
+        .initiatives-table th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .initiatives-table tr:hover {
+            background-color: var(--light-gray);
             cursor: pointer;
         }
-
-        /* Content Styling */
-        .modal-content h1, .modal-content h2, .modal-content h3, .modal-content h4 {
+        
+        .initiatives-table .status-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: var(--medium-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-value {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .planned-text {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+        
+        .in-progress-text {
+            color: var(--info-color);
+            font-weight: bold;
+        }
+        
+        .completed-text {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        /* Initiative Details */
+        .initiative-details {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-top: 20px;
         }
-
-        .modal-content ul {
-            margin-left: 20px;
+        
+        .initiative-details h2 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
         }
-
-        .modal-content p {
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .initiative-details .subtitle {
+            color: #666;
             margin-bottom: 15px;
         }
-
-        /* jsMind Container Styling */
-        #jsmind_container {
-            width: 100%;
-            height: 600px;
-            overflow: auto;
-            border: 1px solid #ccc;
-            background-color: #f4f4f4;
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-section h3 {
+            border-bottom: 1px solid var(--medium-gray);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .tag {
+            background-color: var(--light-gray);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="left-panel">
-        <h3>Mission Areas</h3>
-        <div id="tagContainer">
-            <!-- Checkboxes will be populated here -->
+    <div class="container">
+        <div class="sidebar">
+            <h2>Filter Initiatives</h2>
+            
+            <div class="filter-section">
+                <h3>Mission Areas</h3>
+                <div id="mission-areas-filters">
+                    <!-- Mission area filters will be populated here -->
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Status</h3>
+                <div id="status-filters">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="status-planned" checked>
+                        <label for="status-planned">Planned</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="status-in-progress" checked>
+                        <label for="status-in-progress">In Progress</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="status-completed" checked>
+                        <label for="status-completed">Completed</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Tags</h3>
+                <div id="tags-filters">
+                    <!-- Tag filters will be populated here -->
+                </div>
+            </div>
         </div>
-    </div>
-
-    <div id="mainPanel" class="main-panel"></div>
-
-    <div id="contextMenu" class="context-menu" style="display: none;"></div>
-
-    <!-- Modal Overlay -->
-    <div id="modalOverlay" class="modal-overlay" style="display: none;">
-        <div id="modalContent" class="modal-content">
-            <span id="modalClose" class="modal-close">&times;</span>
-            <div id="modalBody"></div>
+        
+        <div class="main-content">
+            <h1>Government Initiatives Dashboard</h1>
+            
+            <div class="dashboard-intro">
+                <p>This dashboard shows major government initiatives like a flight schedule – you can click any initiative to see its full plan, including objectives and progress updates.</p>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="status-indicator status-planned"></div>
+                        <span>Planned</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="status-indicator status-in-progress"></div>
+                        <span>In Progress</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="status-indicator status-completed"></div>
+                        <span>Completed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="initiatives-table">
+                <thead>
+                    <tr>
+                        <th>Initiative Name</th>
+                        <th>Mission Area</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                        <th>Next Milestone</th>
+                    </tr>
+                </thead>
+                <tbody id="initiatives-table-body">
+                    <!-- Initiative data will be populated here -->
+                </tbody>
+            </table>
+            
+            <div class="initiative-details" id="initiative-details" style="display: none;">
+                <h2>
+                    <span id="detail-title">Initiative Title</span>
+                    <button class="close-button" id="close-details">×</button>
+                </h2>
+                <div class="subtitle" id="detail-subtitle">Mission Area · Status</div>
+                
+                <div class="detail-grid">
+                    <div class="detail-section">
+                        <h3>Vision</h3>
+                        <p id="detail-vision"></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Initial State</h3>
+                        <p id="detail-initial-state"></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Objectives</h3>
+                        <ul id="detail-objectives"></ul>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Roadmap</h3>
+                        <ul id="detail-roadmap"></ul>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Current Status</h3>
+                        <p id="detail-current-status"></p>
+                        <p><strong>Progress:</strong> <span id="detail-progress"></span></p>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>Tags</h3>
+                        <div class="tags-container" id="detail-tags"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Set up the SVG canvas dimensions and margins
-        const margin = { top: 20, right: 150, bottom: 20, left: 150 };
-        const width = 1200 - margin.left - margin.right;
-        const height = 600 - margin.top - margin.bottom;
-
-        const svg = d3.select("#mainPanel").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
-
-        // Define the root data structure with the default Initiatives
-        let root = {
-            name: "Mission Areas",
-            children: [
-                {
-                    name: "Social Subjects",
-                    children: [
-                        { name: "Dismantle DEI Act", isDefault: true }
-                    ],
-                    isDefault: true
-                },
-                {
-                    name: "Government Operations",
-                    children: [
-                        {
-                            name: "Legislative Branch Ineffectiveness",
-                            children: [
-                                { name: "Joint Legislation Development Team", isDefault: true }
-                            ],
-                            isDefault: true
-                        },
-                        { name: "Executive Branch Ops Synergy", isDefault: true },
-                        { name: "Initiative Building Block", isDefault: true }
-                    ],
-                    isDefault: true
-                },
-                {
-                    name: "Civil Rights",
-                    children: [
-                        { name: "Dismantle DEI Act", isDefault: true },
-                        { name: "Exec Directive-DEIA Fed Workforce", isDefault: true }                    ],
-                    isDefault: true
-                }
-            ]
-        };
-
-        // List of mission areas for the checkboxes
-        const missionAreas = [
-            "Affordable Housing", "Air Traffic Control", "Anti-Terrorism", "Armed Forces",
-            "Bureau of Land Management", "Census", "Civil Rights", "Community Planning",
-            "Conflict Resolution", "Consular Services", "Correctional Facilities",
-            "Critical Infrastructure Protection", "Currency and Coinage", "Cybersecurity",
-            "Debt Management", "Defense Budget", "Diplomatic Relations",
-            "Disability Compensation", "Disaster Response", "Disease Control",
-            "Economic Development", "Economic Policy", "Education Research",
-            "Educational Standards", "Electric Grid", "Employment Assistance",
-            "Employment Statistics", "Energy Efficiency", "Energy Policy", "Energy Research",
-            "Fair Housing", "Federal Prosecutions", "Federal Student Aid",
-            "Financial Regulation", "Financial Stability", "Foreign Affairs", "Foreign Aid",
-            "Freight and Logistics", "Global Security", "Government Operations",
-            "Healthcare for Veterans", "Healthcare Services", "Higher Education",
-            "Highway Safety", "Homeland Defense", "Homeownership Programs",
-            "Immigration Services", "Indian Affairs", "Intelligence", "International Treaties",
-            "Labor Standards", "Law Enforcement", "Legal Aid", "Maritime Safety",
-            "Medical Research", "Medicare and Medicaid", "Memorial Affairs",
-            "Military Operations", "National Parks", "National Security",
-            "Native American Affairs", "Natural Resources", "Neighborhood Revitalization",
-            "Nuclear Energy", "Occupational Training", "Oil and Gas", "Patent and Trademark",
-            "Pensions", "Public Health", "Public Housing", "Public Lands", "Public Transit",
-            "Renewable Energy", "Revenue Collection", "School Improvement", "Social Subjects",
-            "Special Education", "Statistical Data", "Substance Abuse", "Taxation",
-            "Teacher Training", "Technology and Innovation", "Terrorism Prevention",
-            "Transportation Infrastructure", "Unemployment Benefits", "Urban Development",
-            "Veteran Affairs", "Veteran Benefits", "Veteran Education", "Wages and Hours",
-            "Weather and Climate", "Welfare Programs", "Wildlife Conservation",
-            "Workers' Compensation", "Workplace Safety"
+        // Sample data for initiatives
+        const initiatives = [
+            {
+                name: "Dismantle DEI Act",
+                missionArea: "Social Subjects",
+                status: "Planned",
+                progress: "0%",
+                nextMilestone: "Q1 2025: Draft bill",
+                vision: "Eliminate DEI initiatives across the government.",
+                initialState: "DEI initiatives are currently in place.",
+                objectives: ["Draft legislation", "Gain legislative support", "Enact the law"],
+                roadmap: ["Q1 2025: Draft bill", "Q2 2025: Lobbying and discussions", "Q3 2025: Vote"],
+                currentStatus: "Bill drafting in progress.",
+                tags: ["Social Subjects", "Government Operations"]
+            },
+            {
+                name: "Joint Legislation Development Team",
+                missionArea: "Government Operations",
+                status: "In Progress",
+                progress: "50%",
+                nextMilestone: "Q1 2025: Platform development",
+                vision: "Improve legislative efficiency through collaboration.",
+                initialState: "Separate legislative processes lead to delays.",
+                objectives: ["Form a joint team", "Develop collaborative platforms", "Implement joint sessions"],
+                roadmap: ["Q4 2024: Team formation", "Q1 2025: Platform development", "Q2 2025: Pilot sessions"],
+                currentStatus: "Platform development ongoing.",
+                tags: ["Government Operations", "Technology and Innovation"]
+            },
+            {
+                name: "Executive Branch Ops Synergy",
+                missionArea: "Government Operations",
+                status: "Completed",
+                progress: "100%",
+                nextMilestone: "Completed",
+                vision: "Enhance synergy across executive departments.",
+                initialState: "Siloed operations in different branches.",
+                objectives: ["Identify synergy opportunities", "Implement joint projects", "Establish communication channels"],
+                roadmap: ["Q3 2024: Opportunity assessment", "Q4 2024: Project implementation", "Q1 2025: Channel setup"],
+                currentStatus: "Communication channels established and functioning.",
+                tags: ["Government Operations"]
+            },
+            {
+                name: "Initiative Building Block",
+                missionArea: "Government Operations",
+                status: "Planned",
+                progress: "0%",
+                nextMilestone: "Q2 2025: Template creation",
+                vision: "Standardize initiative development process.",
+                initialState: "Inconsistent approaches to initiative creation.",
+                objectives: ["Develop a template", "Train staff on the template", "Implement the template across departments"],
+                roadmap: ["Q2 2025: Template creation", "Q3 2025: Training sessions", "Q4 2025: Full implementation"],
+                currentStatus: "Template development has begun.",
+                tags: ["Government Operations", "Process Improvement"]
+            },
+            {
+                name: "Exec Directive-DEIA Fed Workforce",
+                missionArea: "Civil Rights",
+                status: "In Progress",
+                progress: "75%",
+                nextMilestone: "Q2 2025: Policy implementation",
+                vision: "Promote diversity, equity, inclusion, and accessibility in the federal workforce.",
+                initialState: "Underrepresentation in some areas.",
+                objectives: ["Review current workforce data", "Develop strategies for improvement", "Implement new policies"],
+                roadmap: ["Q4 2024: Data review", "Q1 2025: Strategy development", "Q2 2025: Policy implementation"],
+                currentStatus: "Policy implementation underway.",
+                tags: ["Civil Rights", "Government Operations", "Human Resources"]
+            }
         ];
 
-        const defaultMissionAreas = ["Civil Rights", "Government Operations", "Social Subjects"];
+        // DOM Elements
+        const initiativesTableBody = document.getElementById('initiatives-table-body');
+        const initiativeDetails = document.getElementById('initiative-details');
+        const closeDetailsButton = document.getElementById('close-details');
+        const missionAreasFilters = document.getElementById('mission-areas-filters');
+        const tagsFilters = document.getElementById('tags-filters');
+        
+        // Extract unique mission areas and tags
+        const uniqueMissionAreas = [...new Set(initiatives.map(initiative => initiative.missionArea))];
+        const uniqueTags = [...new Set(initiatives.flatMap(initiative => initiative.tags || []))];
 
-        const tagContainer = document.getElementById('tagContainer');
-
-        // Populate the checkbox list with mission areas
-        missionAreas.forEach(tag => {
-            const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = tag;
-            if (defaultMissionAreas.includes(tag)) {
-                checkbox.checked = true;
-            }
-            checkbox.addEventListener('change', updateRootNodes);
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(' ' + tag));
-            tagContainer.appendChild(label);
-        });
-
-        // Update the root nodes based on selected mission areas
-        function updateRootNodes() {
-            const selectedMissionAreas = Array.from(tagContainer.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
-
-            // Keep default nodes
-            const defaultNodes = root.children.filter(node => node.isDefault);
-
-            // Add selected missionAreas as root nodes, avoiding duplicates
-            const selectedNodes = selectedMissionAreas.map(tag => {
-                // Check if the node already exists in root.children
-                let existingNode = root.children.find(node => node.name === tag);
-                if (!existingNode) {
-                    existingNode = { name: tag, children: [] };
-                }
-                return existingNode;
-            });
-
-            // Combine default and selected nodes, ensuring default nodes are included only once
-            root.children = [...new Map([...defaultNodes, ...selectedNodes].map(item => [item.name, item])).values()];
-
-            update(root);
+        // Initialize the dashboard
+        function initDashboard() {
+            // Build the sidebar filters first
+            populateMissionAreaFilters();
+            populateTagFilters();
+            setupEventListeners();
+            
+            // Then populate the table with all initiatives
+            populateInitiativesTable();
+            
+            // Add a debugging message to console
+            console.log('Dashboard initialized with', initiatives.length, 'initiatives');
+            console.log('Mission Areas:', uniqueMissionAreas);
+            console.log('Tags:', uniqueTags);
         }
 
-        const tree = d3.tree().size([height, width]);
+        // Format status with color indicator
+        function formatStatus(status) {
+            let statusClass = '';
+            let textClass = '';
+            
+            if (status === 'Planned') {
+                statusClass = 'status-planned';
+                textClass = 'planned-text';
+            } else if (status === 'In Progress') {
+                statusClass = 'status-in-progress';
+                textClass = 'in-progress-text';
+            } else if (status === 'Completed') {
+                statusClass = 'status-completed';
+                textClass = 'completed-text';
+            }
+            
+            return `
+                <div class="status-cell">
+                    <div class="status-indicator ${statusClass}"></div>
+                    <span class="${textClass}">${status}</span>
+                </div>
+            `;
+        }
 
-        function update(source) {
-            const treeData = tree(d3.hierarchy(root));
-            const nodes = treeData.descendants();
-            const links = treeData.links();
+        // Format progress bar
+        function formatProgressBar(progress, status) {
+            const progressValue = parseInt(progress);
+            let color = '#ccc';
+            
+            if (status === 'Planned') {
+                color = '#f39c12'; // Warning color
+            } else if (status === 'In Progress') {
+                color = '#3498db'; // Info color
+            } else if (status === 'Completed') {
+                color = '#2ecc71'; // Success color
+            }
+            
+            return `
+                <div class="progress-bar">
+                    <div class="progress-value" style="width: ${progressValue}%; background-color: ${color};"></div>
+                </div>
+                <span>${progress}</span>
+            `;
+        }
 
-            let node = svg.selectAll(".node")
-                .data(nodes, d => d.data.name);
-
-            const nodeEnter = node.enter().append("g")
-                .attr("class", "node")
-                .attr("transform", d => `translate(${source.y0 || 0},${source.x0 || 0})`);
-
-            // Append circle for each node
-            nodeEnter.append("circle")
-                .attr("r", d => d.depth === 1 ? 20 : 10)
-                .style("fill", d => d.depth === 1 ? "#8c564b" : (d.children || d._children ? "#e377c2" : "#7f7f7f"))
-                .style("stroke", d => d.depth === 1 ? "#5b3a32" : "#2ca02c")
-                .on("click", function(event, d) {
-                    // Prevent click event from propagating to parent g
-                    event.stopPropagation();
-                    if (d.depth > 0) {
-                        toggleNode(event, d);
-                    }
-                });
-
-            // Append text for each node
-            nodeEnter.append("text")
-                .attr("dy", d => {
-                    if (d.depth === 1) return "-1.5em"; // Root-level nodes
-                    else if (!d.children && !d._children) return "0.35em"; // Leaf nodes
-                    else return "0.35em"; // Other nodes
-                })
-                .attr("x", 0)
-                .attr("text-anchor", "middle")
-                .text(d => d.data.name)
-                .style("fill-opacity", 1)
-                .on("click", function(event, d) {
-                    // Prevent click event from propagating to parent g
-                    event.stopPropagation();
-                    if (d.depth > 0) {
-                        showContextMenu(event, d);
-                    }
-                });
-
-            const nodeUpdate = nodeEnter.merge(node);
-
-            nodeUpdate.transition()
-                .duration(750)
-                .attr("transform", d => `translate(${d.y},${d.x})`);
-
-            nodeUpdate.select("circle")
-                .attr("r", d => d.depth === 1 ? 20 : 10)
-                .style("fill", d => d.depth === 1 ? "#8c564b" : (d.children || d._children ? "#e377c2" : "#7f7f7f"));
-
-            const nodeExit = node.exit().transition()
-                .duration(750)
-                .attr("transform", d => `translate(${source.y},${source.x})`)
-                .remove();
-
-            nodeExit.select("circle")
-                .attr("r", 1e-6);
-
-            nodeExit.select("text")
-                .style("fill-opacity", 1e-6);
-
-            let link = svg.selectAll(".link")
-                .data(links, d => d.target.data.name);
-
-            const linkEnter = link.enter().insert("path", "g")
-                .attr("class", "link")
-                .attr("d", d3.linkHorizontal()
-                    .x(d => source.y0 || 0)
-                    .y(d => source.x0 || 0));
-
-            const linkUpdate = linkEnter.merge(link);
-
-            linkUpdate.transition()
-                .duration(750)
-                .attr("d", d3.linkHorizontal()
-                    .x(d => d.y)
-                    .y(d => d.x));
-
-            link.exit().transition()
-                .duration(750)
-                .attr("d", d3.linkHorizontal()
-                    .x(d => source.y)
-                    .y(d => source.x))
-                .remove();
-
-            nodes.forEach(d => {
-                d.x0 = d.x;
-                d.y0 = d.y;
+        // Populate initiatives table
+        function populateInitiativesTable() {
+            initiativesTableBody.innerHTML = '';
+            
+            initiatives.forEach(initiative => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${initiative.name}</td>
+                    <td>${initiative.missionArea}</td>
+                    <td>${formatStatus(initiative.status)}</td>
+                    <td>${formatProgressBar(initiative.progress, initiative.status)}</td>
+                    <td>${initiative.nextMilestone}</td>
+                `;
+                
+                row.addEventListener('click', () => showInitiativeDetails(initiative));
+                initiativesTableBody.appendChild(row);
             });
         }
 
-        function toggleNode(event, d) {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            } else {
-                d.children = d._children;
-                d._children = null;
-            }
-            update(d);
-        }
-
-        // Content object with updated Markdown content
-        const InitiativeContent = {
-            'Initiative Building Block': `
-
-# 1. Vision
-## 1.1. State Initiative
-## 1.2. Initiative concept description
-## 1.3. Initiative Rationale ("Why"/"So-What?")
-## 1.4. Goals
-## 1.5. Goals Action Plan Summation
-# 2. Starting Point Attributes
-## 2.1. Initial state description
-## 2.2. Measureable elements breakdown
-## 2.3. Measureable metrics: ($,%,#,time, state-description)
-# 3. Goals
-## 3.1. Desired outcome/solution
-## 3.2. Goals Metrics ($,%,#,time,state-description)
-# 4. Action Plan
-## 4.1. Responsibility distribution
-## 4.2. Ordered actions
-# 5. Progress
-## 5.1. Latest-state defined attributes
-## 5.2. Latest-State progression
-            `,
-            'Executive Branch Ops Synergy': `
-
-# 1. Vision
-## 1.1 Enable ops situation awareness (SA) synergy by using activity info standards and availability
-## 1.2 Activity info standardization enables dashboard visibility and SA of:
-### 1.2.1 Government activity details
-### 1.2.2 Wide spectrum SA at all releasable levels
-### 1.2.3 Collaboration and action needs/opportunities
-## 1.3 Beta-test this ops structure to test potential effectiveness
-### 1.3.1 2-3 SMEs could create prototype Initiative-info standard and prototype-dashboard in hour(s)
-# 2. Starting Point
-## 2.1 Personnel at all levels have limited-sphere government activity awareness
-## 2.2 Lacking outside activity awareness hiding issues and opportunities
-## 2.3 Lacking government transparency
-## 2.4 Unorganized Legislative branch collaboration and unity of efforts
-# 3. Goals
-## 3.1 Enable government SA at all releasable levels
-### 3.1.1 Enable identification of conflicting or collaborative activities
-## 3.2 Providing government transparency
-## 3.3 Enabling Legislative branch activities collaboration using dashboard elements
-### 3.3.1 Propose legislation via documented Initiatives
-### 3.3.2 Develop legislation with HoR and Senate collaboratively
-## 3.4 Maintained governance element data
-# 4. Action Plan
-## 4.1 Conduct operations beta-test
-### 4.1.1 Develop experimental governance dashboard
-### 4.1.2 Assign related offices to operate using Initiative-based methods
-### 4.1.3 Adapt operations procedures as needed
-# 5. Progress
-## 5.1 Leadership assess ops utility
-            `,
-            'Legislative Branch Ineffectiveness': `
-
-# 1. Vision
-## 1.1. Definition
-### Correct poor Legislative branch collaboration
-## 1.2. Thesis
-### Decoupled HoR/Senate bills development disables effective & efficient governance operations, increases economic & social conflict
-## 1.3. Rationale
-### Collaborative bills development would avoid impassible bills from voting; wasted time/manpower
-## 1.4. Goals
-### Implement synergistic bills development procedures
-## 1.5. Action Plan
-### Use "Initiative" elements and joint staff for bills development
-# 2. Starting Point Attributes
-## 2.1. Procedures
-### Require 'backward-collaboration' from decoupled HoR/Senate bills development & passage
-## 2.2. Leadership
-### Lacking prioritized and productive leadership
-### Ideology & social activism primary bills drivers
-## 2.3. Bill transparency
-### Bill content & derivation unknown/misinformed to public
-## 2.4. Information distribution
-### Inaccurate, deceiving, incomplete info distributed
-### Sources: Journalism, activist, entertainer, educator, showmanship-politician
-## 2.5. Bill passage rate
-### Small percentage proposed bills passed
-## 2.6. Starting point metrics examples
-### 2.6.1. Bill passage rate
-#### Thousands proposed bills, 27 passed in 2023
-### 2.6.2. Budget bill passage
-#### Last on-time budget bill passed 1996, 4 passed in 40 years
-### 2.6.3. Legislation focus
-#### Social activism (e.g., sexual preference, CRT, DEI, abortion, student loan forgiveness) vice government ops
-### 2.6.4. Branch visibility
-#### Political video hearings & distribution primary Branch visibility
-# 3. Goals Attributes
-## 3.1. Bill passage efficiency
-### 3.1.1. Collaborative development
-#### Use joint stakeholder (HoR, Senate, Executive-liaison) bills development
-### 3.1.2. Development template
-#### Use a "Initiative" template as a 'blood cell' to bills development
-## 3.2. Public awareness
-### 3.2.1. Initiatives Dashboard
-#### "Initiatives Dashboard" available: Display mind map showing bills Initiatives
-### 3.2.2. Legislation activity visibility
-#### View legislation activity: public awareness, outside innovation, offset misinformation
-### 3.2.3. Progress Metrics
-#### 3.2.3.1. Bill passage rate
-##### <20% proposed bills passed>
-#### 3.2.3.2. Bill enforceability
-##### <40% are enforceable>
-#### 3.2.3.3. Budget bill passage
-##### <budget bill(s) passed>
-# 4. Action Plan
-## 4.1. Initiatives Dashboard
-### Develop Initiatives Dashboard
-## 4.2. Joint bills-development
-### 4.2.1. Identify Initiatives "Centers of Gravity"
-#### Many interrelations, time sensitive, "High Value Targets"
-### 4.2.2. Initiative attributes
-#### Complete Initiative attributes
-### 4.2.3. Bill drafting
-#### Draft scoped bills w/ scoped Initiatives-set
-### 4.2.4. Executive Branch collaboration
-#### Collaborate with Executive Branch stakeholders
-### 4.2.5. Bill passage process
-#### Pass only collaboratively developed bills for HoR & Senate vote
-# 5. Progress
-## 5.1. Goals attributes
-### Define goals attributes: No change
-## 5.2. Goals Progress Metrics
-### Assess Goals Progress Metrics: No change
-            `,
-            'Dismantle DEI Act': `
-
-# 1. "Initiative" Vision
-## 1.1 Destructive ideology breeding hatred and division
-## 1.2 Eliminate federal DEI programs and funding
-## 1.3 Vision
-### 1.3.1 Eliminate DEI to promote merit-based practices
-### 1.3.2 Reduce perceived social division
-## 1.4 Rationale
-### 1.4.1 DEI perpetuates discrimination
-### 1.4.2 DEI destroys competence
-### 1.4.3 Taxpayers shouldn't fund "woke" agenda
-# 2. Starting Point Attributes
-## 2.1 Widespread DEI programs in federal agencies
-## 2.2 Perceived national division
-## 2.3 Large federal contracts potentially implementing DEI
-# 3. Goals Attributes
-## 3.1 Eliminate federal DEI programs
-## 3.2 Strip DEI funding
-## 3.3 Remove DEI from federal bureaucracy
-## 3.4 Restore meritocracy and equal treatment
-# 4. Action Plan
-## 4.1 Rescind executive orders
-## 4.2 Terminate Chief Diversity Officers
-## 4.3 Close DEI offices
-## 4.4 End DEI trainings
-## 4.5 Outlaw mandatory DEI pledges
-## 4.6 Revoke DEI funding
-## 4.7 Prevent DEI in federal contracts
-## 4.8 Prevent DEI in federal grants
-## 4.9 Prevent DEI in educational accreditation
-# 5. Progress
-## 5.1 No clear metrics specified
-## 5.2 Potential future assessments
-### 5.2.1 Government efficiency
-### 5.2.2 Employee satisfaction
-### 5.2.3 Societal unity indicators
-            `,
-            'Joint Legislation Development Team':  `
-
-# 1. Vision
-## 1.1. State Initiative 
-### Create a Joint Legislative Development Team to address legislative branch inefficiencies.
-## 1.2. Initiative Concept Description
-### A team composed of members from the HoR, Senate, and Executive Branch liaison to develop bills collaboratively based on scoped 'Initiatives'.
-## 1.3. Initiative Rationale ("Why"/"So-What?")
-### Decoupled bill development leads to inefficiencies, prolonged legislative processes, and conflicting bills.
-## 1.4. Goals
-### Establish a Joint Legislative Development Team tasked with collaborative bills development.
-## 1.5. Goals Action Plan Summation
-### Establish joint development procedures and ensure synergy between legislative branches.
-# 2. Starting Point Attributes
-## 2.1. Initial State Description
-### Legislative bill development is currently decoupled between the House and Senate.
-## 2.2. Starting Point Elements Breakdown
-### Lack of collaboration leads to redundant, conflicting bills, delayed processes, and wasted resources.
-## 2.3. Starting Point Metrics: ($,%,#,time, state-description)
-### Less than 20% of proposed bills are passed.
-### Only 4 budget bills in 40 years have been passed on time.
-# 3. Goals
-## 3.1. Desired Outcome/Solution
-### Collaborative bills developed by a Joint Legislative Development Team.
-## 3.2. Goals Metrics: ($,%,#,time, state-description)
-### Increased bill passage rate.
-### Improved transparency and collaboration between branches.
-# 4. Action Plan
-## 4.1. Responsibility Distribution
-### Joint Legislative Development Team consisting of members from the HoR, Senate, and Executive Branch.
-## 4.2. Ordered Actions
-### Identify Initiatives.
-### Develop a Initiatives-based bill drafting template.
-### Establish collaboration channels with the Executive Branch.
-# 5. Progress
-## 5.1. Latest-State Defined Attributes
-### Regular assessment of team efficiency, bill passage rates, and collaboration outcomes.
-## 5.2. Latest-State Progression
-### Track bill development progress and ensure alignment with Goals
-            `,
-            'Exec Directive-DEIA Fed Workforce':   `
-
-# 1. Vision
-## 1.1. State Initiative
-### 1.1.1. The DEIA Fed Workforce Directive aims to implement comprehensive reforms to promote diversity, equity, inclusion, and accessibility within the Federal workforce.
-## 1.2. Initiative concept description
-### 1.2.1. The Initiative is rooted in ensuring that the Federal workforce reflects the diversity of the American public.
-### 1.2.2. The Initiative is to provide equitable opportunities for all employees, particularly those from underserved communities.
-## 1.3. Initiative Rationale ("Why"/"So-What?")
-### 1.3.1. A workforce that reflects diverse perspectives is more capable, innovative, and able to address the needs of the public.
-### 1.3.2. A diverse workforce leads to higher-performing organizations and enhanced governmental performance.
-## 1.4. Goals
-### 1.4.1. The objective is to cultivate a diverse, inclusive, and accessible workforce by:
-#### 1.4.1.1. Addressing systemic barriers to equity in recruitment, hiring, and promotion.
-#### 1.4.1.2. Establishing reporting and accountability measures to monitor progress.
-#### 1.4.1.3. Aligning DEIA strategies across federal agencies with prior executive orders and statutory mandates.
-## 1.5. Goals Action Plan Summation
-### 1.5.1. The Action Plan includes short-term (within 150 days), medium-term (quarterly goals), and long-term (annual reporting) actions.
-### 1.5.2. The Action Plan begins with assessments of current agency practices and leads to ongoing improvement in DEIA performance.
-# 2. Starting Point Attributes
-## 2.1. Current state description
-### 2.1.1. Many Federal agencies face barriers to equity in hiring, retention, and development.
-### 2.1.2. Agencies lack comprehensive strategies to address inclusion and accessibility for underserved groups.
-## 2.2. Starting Point elements breakdown
-### 2.2.1. Existing recruitment practices do not adequately address the inclusion of underserved communities.
-### 2.2.2. Hiring processes may lack equitable review mechanisms.
-### 2.2.3. Limited retention and professional development opportunities for employees from diverse backgrounds.
-## 2.3. Starting Point metrics: ($,%,#,time, state-description)
-### 2.3.1. Diversity in hiring: Percentage of employees from underserved communities (%).
-### 2.3.2. Retention: Attrition rates among diverse employees (#, time).
-### 2.3.3. Accessibility: Rate of accommodation requests processed in compliance with regulations (%).
-# 3. Goals
-## 3.1. Desired outcome/solution
-### 3.1.1. A fully diverse, equitable, inclusive, and accessible Federal workforce where systemic barriers have been addressed.
-### 3.1.2. The workforce should reflect the diversity of the American people.
-## 3.2. Goals Metrics ($,%,#,time)
-### 3.2.1. Increase in recruitment from underserved communities (%, #).
-### 3.2.2. Improved retention of employees from diverse backgrounds (#, time).
-### 3.2.3. Compliance with accessibility regulations and provision of accommodations (%, #).
-# 4. Action Plan
-## 4.1. Short-Term Actions (within 100-150 days)
-### 4.1.1. Conduct preliminary DEIA assessments within each agency.
-#### 4.1.1.1. Identify barriers in recruitment, hiring, promotion, and retention.
-#### 4.1.1.2. Report findings to the Director of OPM and OMB.
-### 4.1.2. Develop a government-wide DEIA strategic plan.
-#### 4.1.2.1. Define standards for success.
-#### 4.1.2.2. Align DEIA initiatives with EO 13985 and other directives.
-## 4.2. Medium-Term Actions (within 120 days and quarterly thereafter)
-### 4.2.1. Agencies develop and submit their DEIA strategic plans.
-#### 4.2.1.1. Include quarterly goals for improvement.
-#### 4.2.1.2. Address specific barriers identified in the assessments.
-### 4.2.2. Agencies begin reporting quarterly on DEIA progress.
-#### 4.2.2.1. Implement data collection mechanisms for demographic tracking.
-## 4.3. Long-Term Actions (annual reporting)
-### 4.3.1. Annual report to the President on the status of DEIA implementation.
-#### 4.3.1.1. Make progress publicly available.
-### 4.3.2. Continue aligning agency policies with updated DEIA strategies.
-# 5. Risks & Challenges
-## 5.1. Risks
-### 5.1.1. Potential lack of alignment across agencies in implementing DEIA plans.
-### 5.1.2. Insufficient resources or staffing to support DEIA initiatives.
-### 5.1.3. Resistance to changes in hiring and promotion practices.
-## 5.2. Mitigation Strategies
-### 5.2.1. Ensure cross-agency coordination and communication.
-### 5.2.2. Provide technical assistance to agencies as needed.
-### 5.2.3. Monitor progress and adjust goals based on data-driven insights
-            `,
-        };
-
-        // Function to show the context menu
-        function showContextMenu(event, d) {
-            event.preventDefault(); // Prevent default context menu
-            const contextMenu = d3.select("#contextMenu");
-            contextMenu.html("");
-
-            if (d.depth === 1) {
-                contextMenu.append("div").text("Add a Initiative").on("click", () => {
-                    addInitiative(d);
-                    contextMenu.style("display", "none");
-                });
-                contextMenu.append("div").text("Remove from display").on("click", () => {
-                    removeFromDisplay(d);
-                    contextMenu.style("display", "none");
-                });
-                contextMenu.append("div").text("Display related data").on("click", () => {
-                    displayRelatedData(d);
-                    contextMenu.style("display", "none");
-                });
-            } else {
-                contextMenu.append("div").text("Add a sub-Initiative").on("click", () => {
-                    addSubInitiative(d);
-                    contextMenu.style("display", "none");
-                });
-                contextMenu.append("div").text("Link to another mission area").on("click", () => {
-                    linkToAnotherTag(d);
-                    contextMenu.style("display", "none");
-                });
-                contextMenu.append("div").text("Display text outline").on("click", () => {
-                    displayTextOutline(d);
-                    contextMenu.style("display", "none");
-                });
-                contextMenu.append("div").text("Display mind map").on("click", () => {
-                    displayMindMap(d);
-                    contextMenu.style("display", "none");
-                });
-                contextMenu.append("div").text("Remove from display").on("click", () => {
-                    removeFromDisplay(d);
-                    contextMenu.style("display", "none");
-                });
-            }
-
-            contextMenu.style("left", (event.pageX + 5) + "px")
-                       .style("top", (event.pageY + 5) + "px")
-                       .style("display", "block");
-
-            d3.select("body").on("click", () => contextMenu.style("display", "none"));
-        }
-
-        // Function to add a new Initiative
-        function addInitiative(d) {
-            const name = prompt("Enter Initiative name:");
-            if (name) {
-                if (!d.data.children) d.data.children = [];
-                d.data.children.push({ name: name });
-                update(d);
-            }
-        }
-
-        // Function to add a sub-Initiative
-        function addSubInitiative(d) {
-            const name = prompt("Enter sub-Initiative name:");
-            if (name) {
-                if (!d.data.children) d.data.children = [];
-                d.data.children.push({ name: name });
-                update(d);
-            }
-        }
-
-        // Function to remove a node from display
-        function removeFromDisplay(d) {
-            if (d.depth === 1 && !d.data.isDefault) {
-                // Uncheck the corresponding checkbox
-                const checkbox = tagContainer.querySelector(`input[type="checkbox"][value="${d.data.name}"]`);
-                if (checkbox) {
-                    checkbox.checked = false;
-                }
-                updateRootNodes();
-            } else if (d.depth > 1 && !d.data.isDefault) {
-                const parent = d.parent;
-                parent.data.children = parent.data.children.filter(child => child.name !== d.data.name);
-                if (parent.data.children.length === 0) {
-                    delete parent.data.children;
-                }
-                update(root);
-            }
-        }
-
-        // Function to display related data (placeholder)
-        function displayRelatedData(d) {
-            alert(`Displaying related data for ${d.data.name}`);
-        }
-
-        // Function to link a node to another mission area
-        function linkToAnotherTag(d) {
-            const tagName = prompt("Enter mission area name to link to:");
-            if (tagName) {
-                const targetTag = root.children.find(child => child.name === tagName);
-                if (targetTag) {
-                    if (!targetTag.children) targetTag.children = [];
-                    targetTag.children.push({ ...d.data });
-                    update(root);
-                } else {
-                    alert("Mission area not found");
-                }
-            }
-        }
-
-        // Function to display the text outline
-        function displayTextOutline(d) {
-            const InitiativeName = d.data.name;
-            const markdownContent = InitiativeContent[InitiativeName];
-
-            if (markdownContent) {
-                // Parse the Markdown content to HTML
-                const htmlContent = marked.parse(markdownContent);
-
-                // Display the content in the modal
-                const modalOverlay = document.getElementById('modalOverlay');
-                const modalBody = document.getElementById('modalBody');
-                modalBody.innerHTML = htmlContent;
-                modalOverlay.style.display = 'block';
-
-                // Close modal when 'x' is clicked
-                document.getElementById('modalClose').onclick = function() {
-                    modalOverlay.style.display = 'none';
-                };
-
-                // Close modal when clicking outside the modal content
-                window.onclick = function(event) {
-                    if (event.target == modalOverlay) {
-                        modalOverlay.style.display = 'none';
-                    }
-                };
-            } else {
-                alert(`No content available for ${InitiativeName}`);
-            }
-        }
-
-        // Function to parse Markdown content into a tree structure
-        function parseMarkdownToTree(markdownContent, InitiativeName) {
-            const tokens = marked.lexer(markdownContent);
-            const root = { id: 'root', topic: InitiativeName, children: [] };
-            const stack = [root];
-
-            tokens.forEach(token => {
-                if (token.type === 'heading') {
-                    const node = {
-                        id: 'node_' + Math.random().toString(36).substr(2, 9),
-                        topic: token.text,
-                        expanded: true,
-                        children: []
-                    };
-                    const level = token.depth;
-
-                    // Adjusted stack management
-                    if (level > stack.length) {
-                        // New child
-                        const parent = stack[stack.length - 1];
-                        parent.children.push(node);
-                        stack.push(node);
-                    } else {
-                        // Pop to the correct parent level
-                        while (level <= stack.length - 1) {
-                            stack.pop();
-                        }
-                        const parent = stack[stack.length - 1];
-                        parent.children.push(node);
-                        stack.push(node);
-                    }
-                }
+        // Populate mission area filters
+        function populateMissionAreaFilters() {
+            missionAreasFilters.innerHTML = '';
+            
+            uniqueMissionAreas.forEach(area => {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'checkbox-item';
+                const id = `mission-${area.replace(/\s+/g, '-').toLowerCase()}`;
+                
+                checkbox.innerHTML = `
+                    <input type="checkbox" id="${id}" checked>
+                    <label for="${id}">${area}</label>
+                `;
+                missionAreasFilters.appendChild(checkbox);
+                
+                // Ensure the checkbox has a change event listener
+                const checkboxInput = checkbox.querySelector('input');
+                checkboxInput.addEventListener('change', filterInitiatives);
             });
-
-            return root;
         }
 
-        // Function to display the mind map
-        function displayMindMap(d) {
-            const InitiativeName = d.data.name;
-            const markdownContent = InitiativeContent[InitiativeName];
+        // Populate tag filters
+        function populateTagFilters() {
+            tagsFilters.innerHTML = '';
+            
+            uniqueTags.forEach(tag => {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'checkbox-item';
+                const id = `tag-${tag.replace(/\s+/g, '-').toLowerCase()}`;
+                
+                checkbox.innerHTML = `
+                    <input type="checkbox" id="${id}">
+                    <label for="${id}">${tag}</label>
+                `;
+                tagsFilters.appendChild(checkbox);
+                
+                // Ensure the checkbox has a change event listener
+                const checkboxInput = checkbox.querySelector('input');
+                checkboxInput.addEventListener('change', filterInitiatives);
+            });
+        }
 
-            if (markdownContent) {
-                // Parse the Markdown content to a tree structure
-                const mindRoot = parseMarkdownToTree(markdownContent, InitiativeName);
+        // Show initiative details
+        function showInitiativeDetails(initiative) {
+            // Set initiative details
+            document.getElementById('detail-title').textContent = initiative.name;
+            document.getElementById('detail-subtitle').textContent = `${initiative.missionArea} · ${initiative.status}`;
+            document.getElementById('detail-vision').textContent = initiative.vision;
+            document.getElementById('detail-initial-state').textContent = initiative.initialState;
+            document.getElementById('detail-current-status').textContent = initiative.currentStatus;
+            document.getElementById('detail-progress').textContent = initiative.progress;
+            
+            // Set objectives
+            const objectivesList = document.getElementById('detail-objectives');
+            objectivesList.innerHTML = '';
+            initiative.objectives.forEach(objective => {
+                const li = document.createElement('li');
+                li.textContent = objective;
+                objectivesList.appendChild(li);
+            });
+            
+            // Set roadmap
+            const roadmapList = document.getElementById('detail-roadmap');
+            roadmapList.innerHTML = '';
+            initiative.roadmap.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                roadmapList.appendChild(li);
+            });
+            
+            // Set tags
+            const tagsContainer = document.getElementById('detail-tags');
+            tagsContainer.innerHTML = '';
+            if (initiative.tags && initiative.tags.length > 0) {
+                initiative.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'tag';
+                    tagSpan.textContent = tag;
+                    tagsContainer.appendChild(tagSpan);
+                });
+            } else {
+                tagsContainer.innerHTML = '<span>No tags assigned</span>';
+            }
+            
+            // Show details panel
+            initiativeDetails.style.display = 'block';
+        }
 
-                if (mindRoot) {
-                    // Build mind map data
-                    const mindData = {
-                        meta: {
-                            name: InitiativeName,
-                            author: 'Your Name',
-                            version: '1.0'
-                        },
-                        format: 'node_tree',
-                        data: mindRoot
-                    };
-
-                    // Display the mind map in the modal
-                    const modalOverlay = document.getElementById('modalOverlay');
-                    const modalBody = document.getElementById('modalBody');
-                    modalBody.innerHTML = `
-                        <div id="mindmap-controls" style="text-align: center; margin-bottom: 10px;">
-                            <button id="zoomInBtn">Zoom In</button>
-                            <button id="zoomOutBtn">Zoom Out</button>
-                            <button id="resetZoomBtn">Reset Zoom</button>
-                        </div>
-                        <div id="jsmind_container"></div>
+        // Filter initiatives based on selected filters
+        function filterInitiatives() {
+            const selectedMissionAreas = [];
+            const selectedStatuses = [];
+            const selectedTags = [];
+            
+            // Get selected mission areas
+            document.querySelectorAll('#mission-areas-filters input:checked').forEach(checkbox => {
+                const areaId = checkbox.id.replace('mission-', '').replace(/-/g, ' ');
+                const capitalizedArea = areaId.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                selectedMissionAreas.push(capitalizedArea);
+            });
+            
+            // Get selected statuses
+            document.querySelectorAll('#status-filters input:checked').forEach(checkbox => {
+                if (checkbox.id === 'status-planned') selectedStatuses.push('Planned');
+                if (checkbox.id === 'status-in-progress') selectedStatuses.push('In Progress');
+                if (checkbox.id === 'status-completed') selectedStatuses.push('Completed');
+            });
+            
+            // Get selected tags
+            document.querySelectorAll('#tags-filters input:checked').forEach(checkbox => {
+                const tagId = checkbox.id.replace('tag-', '').replace(/-/g, ' ');
+                const capitalizedTag = tagId.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                selectedTags.push(capitalizedTag);
+            });
+            
+            // Debug logging
+            console.log('Selected Mission Areas:', selectedMissionAreas);
+            console.log('Selected Statuses:', selectedStatuses);
+            console.log('Selected Tags:', selectedTags);
+            
+            // Filter initiatives
+            const filteredInitiatives = initiatives.filter(initiative => {
+                const missionAreaMatch = selectedMissionAreas.length === 0 || 
+                                        selectedMissionAreas.includes(initiative.missionArea);
+                
+                const statusMatch = selectedStatuses.length === 0 || 
+                                   selectedStatuses.includes(initiative.status);
+                
+                const tagMatch = selectedTags.length === 0 || 
+                               (initiative.tags && initiative.tags.some(tag => selectedTags.includes(tag)));
+                
+                return missionAreaMatch && statusMatch && (selectedTags.length === 0 || tagMatch);
+            });
+            
+            console.log('Filtered Initiatives:', filteredInitiatives);
+            
+            // Update table with filtered initiatives
+            initiativesTableBody.innerHTML = '';
+            
+            if (filteredInitiatives.length === 0) {
+                // Show a message when no initiatives match the filters
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" style="text-align: center; padding: 20px;">
+                        No initiatives match the selected filters. Try adjusting your filter criteria.
+                    </td>
+                `;
+                initiativesTableBody.appendChild(row);
+            } else {
+                // Populate with filtered initiatives
+                filteredInitiatives.forEach(initiative => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${initiative.name}</td>
+                        <td>${initiative.missionArea}</td>
+                        <td>${formatStatus(initiative.status)}</td>
+                        <td>${formatProgressBar(initiative.progress, initiative.status)}</td>
+                        <td>${initiative.nextMilestone}</td>
                     `;
-                    modalOverlay.style.display = 'block';
-
-                    const options = {
-                        container: 'jsmind_container',
-                        editable: false,
-                        theme: 'primary'
-                    };
-                    const jm = new jsMind(options);
-                    jm.show(mindData);
-
-                    // Zoom control buttons
-                    document.getElementById('zoomInBtn').onclick = function() {
-                        jm.view.zoomIn();
-                    };
-                    document.getElementById('zoomOutBtn').onclick = function() {
-                        jm.view.zoomOut();
-                    };
-                    document.getElementById('resetZoomBtn').onclick = function() {
-                        jm.view.setZoom(1);
-                    };
-
-                    // Close modal when 'x' is clicked
-                    document.getElementById('modalClose').onclick = function() {
-                        modalOverlay.style.display = 'none';
-                    };
-
-                    // Close modal when clicking outside the modal content
-                    window.onclick = function(event) {
-                        if (event.target == modalOverlay) {
-                            modalOverlay.style.display = 'none';
-                        }
-                    };
-                } else {
-                    alert(`No mind map data available for ${d.data.name}`);
-                }
-            } else {
-                alert(`No content available for ${InitiativeName}`);
+                    
+                    row.addEventListener('click', () => showInitiativeDetails(initiative));
+                    initiativesTableBody.appendChild(row);
+                });
             }
         }
 
-        // Initial render
-        updateRootNodes();
+        // Setup event listeners
+        function setupEventListeners() {
+            // Close details panel
+            closeDetailsButton.addEventListener('click', () => {
+                initiativeDetails.style.display = 'none';
+            });
+            
+            // Set up status filter checkboxes
+            const statusCheckboxes = document.querySelectorAll('#status-filters input[type="checkbox"]');
+            statusCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', filterInitiatives);
+            });
+            
+            // Add reset button
+            const sidebar = document.querySelector('.sidebar');
+            const resetButton = document.createElement('button');
+            resetButton.textContent = 'Reset All Filters';
+            resetButton.style.marginTop = '20px';
+            resetButton.style.padding = '8px 16px';
+            resetButton.style.backgroundColor = '#e74c3c';
+            resetButton.style.color = 'white';
+            resetButton.style.border = 'none';
+            resetButton.style.borderRadius = '4px';
+            resetButton.style.cursor = 'pointer';
+            resetButton.style.width = '100%';
+            
+            resetButton.addEventListener('click', () => {
+                // Reset all checkboxes
+                const allCheckboxes = document.querySelectorAll('.sidebar input[type="checkbox"]');
+                allCheckboxes.forEach(cb => {
+                    if (cb.id.startsWith('mission-')) {
+                        cb.checked = true; // Check all mission areas
+                    } else if (cb.id.startsWith('status-')) {
+                        cb.checked = true; // Check all statuses
+                    } else if (cb.id.startsWith('tag-')) {
+                        cb.checked = false; // Uncheck all tags
+                    }
+                });
+                
+                // Re-apply filters
+                filterInitiatives();
+            });
+            
+            sidebar.appendChild(resetButton);
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
 </html>
