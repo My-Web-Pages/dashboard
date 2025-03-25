@@ -5,59 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CohesiveGov Initiatives Dashboard</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --light-gray: #f5f5f5;
-            --medium-gray: #e0e0e0;
-            --text-color: #333;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --info-color: #2980b9;
-        }
-        
+        /* Base styles */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background-color: #f8f9fa;
-            color: var(--text-color);
             line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
         }
         
+        /* Layout */
         .container {
             display: flex;
             min-height: 100vh;
         }
         
-        /* Sidebar Styles */
+        /* Sidebar */
         .sidebar {
             width: 250px;
-            background-color: var(--primary-color);
-            color: white;
+            background-color: #2c3e50;
+            color: #fff;
             padding: 20px;
-            transition: all 0.3s;
             overflow-y: auto;
         }
         
         .sidebar h2 {
             margin-bottom: 20px;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         
         .filter-section {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .filter-section h3 {
             margin-bottom: 10px;
             font-size: 1.1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         
         .checkbox-item {
@@ -66,11 +62,22 @@
             margin-bottom: 8px;
         }
         
-        .checkbox-item input[type="checkbox"] {
-            margin-right: 10px;
+        .checkbox-item input {
+            margin-right: 8px;
         }
         
-        /* Main Content Styles */
+        .reset-button {
+            width: 100%;
+            padding: 8px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        /* Main content */
         .main-content {
             flex: 1;
             padding: 20px;
@@ -78,7 +85,7 @@
         }
         
         h1 {
-            color: var(--primary-color);
+            color: #2c3e50;
             margin-bottom: 20px;
         }
         
@@ -92,6 +99,7 @@
         
         .legend {
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
             margin-top: 10px;
         }
@@ -102,51 +110,75 @@
             gap: 5px;
         }
         
-        .status-indicator {
+        .status-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
         }
         
         .status-planned {
-            background-color: var(--warning-color);
+            background-color: #f39c12;
         }
         
         .status-in-progress {
-            background-color: var(--info-color);
+            background-color: #3498db;
         }
         
         .status-completed {
-            background-color: var(--success-color);
+            background-color: #2ecc71;
         }
         
-        /* Table View Styles */
-        .initiatives-table {
+        /* Table */
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
             background-color: white;
+            margin-bottom: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            table-layout: fixed; /* Add fixed layout for more predictable sizing */
         }
         
-        .initiatives-table th, 
-        .initiatives-table td {
+        th, td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid var(--medium-gray);
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word; /* Allow text to wrap within cells */
+            overflow-wrap: break-word;
         }
         
-        .initiatives-table th {
-            background-color: var(--secondary-color);
+        th {
+            background-color: #34495e;
             color: white;
         }
         
-        .initiatives-table tr:hover {
-            background-color: var(--light-gray);
+        tr:hover {
+            background-color: #f5f5f5;
             cursor: pointer;
         }
         
-        .initiatives-table .status-cell {
+        /* Column widths for better mobile display */
+        th:nth-child(1), td:nth-child(1) { /* Initiative Name column */
+            width: 25%;
+        }
+        
+        th:nth-child(2), td:nth-child(2) { /* Mission Area column */
+            width: 20%;
+        }
+        
+        th:nth-child(3), td:nth-child(3) { /* Status column */
+            width: 15%;
+        }
+        
+        th:nth-child(4), td:nth-child(4) { /* Progress column */
+            width: 15%;
+        }
+        
+        th:nth-child(5), td:nth-child(5) { /* Next Milestone column */
+            width: 25%;
+        }
+        
+        /* Status cells */
+        .status-cell {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -155,7 +187,7 @@
         .progress-bar {
             width: 100%;
             height: 8px;
-            background-color: var(--medium-gray);
+            background-color: #e0e0e0;
             border-radius: 4px;
             overflow: hidden;
         }
@@ -165,32 +197,34 @@
             border-radius: 4px;
         }
         
+        /* Status text colors */
         .planned-text {
-            color: var(--warning-color);
+            color: #f39c12;
             font-weight: bold;
         }
         
         .in-progress-text {
-            color: var(--info-color);
+            color: #3498db;
             font-weight: bold;
         }
         
         .completed-text {
-            color: var(--success-color);
+            color: #2ecc71;
             font-weight: bold;
         }
         
-        /* Initiative Details */
+        /* Details panel */
         .initiative-details {
             background-color: white;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-top: 20px;
+            display: none;
         }
         
         .initiative-details h2 {
-            color: var(--primary-color);
+            color: #2c3e50;
             margin-bottom: 5px;
             display: flex;
             justify-content: space-between;
@@ -203,15 +237,9 @@
             cursor: pointer;
         }
         
-        .initiative-details .subtitle {
+        .subtitle {
             color: #666;
             margin-bottom: 15px;
-        }
-        
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
         }
         
         .detail-section {
@@ -219,10 +247,10 @@
         }
         
         .detail-section h3 {
-            border-bottom: 1px solid var(--medium-gray);
+            border-bottom: 1px solid #e0e0e0;
             padding-bottom: 5px;
             margin-bottom: 10px;
-            color: var(--secondary-color);
+            color: #34495e;
         }
         
         .tags-container {
@@ -233,13 +261,43 @@
         }
         
         .tag {
-            background-color: var(--light-gray);
-            padding: 3px 8px;
+            background-color: #f5f5f5;
+            padding: 4px 8px;
             border-radius: 3px;
             font-size: 0.9rem;
         }
         
-        /* Responsive Design */
+        /* Mobile styles */
+        .mobile-filter-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .mobile-close {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -247,28 +305,74 @@
             
             .sidebar {
                 width: 100%;
-                order: 2;
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 1000;
+                padding-top: 40px;
             }
             
-            .main-content {
-                order: 1;
+            .mobile-filter-toggle {
+                display: block;
             }
             
-            .detail-grid {
-                grid-template-columns: 1fr;
+            .mobile-close {
+                display: block;
+            }
+            
+            .sidebar.mobile-visible {
+                display: block;
+            }
+            
+            /* Adjust table for small screens */
+            table {
+                font-size: 0.9rem; /* Slightly smaller font */
+            }
+            
+            th, td {
+                padding: 8px 10px; /* Smaller padding */
+            }
+            
+            /* Only show essential columns on very small screens */
+            @media (max-width: 380px) {
+                /* Adjust table for small screens */
+                th:nth-child(2), td:nth-child(2) { /* Mission Area column */
+                    width: 25%;
+                    font-size: 0.85rem;
+                }
+                
+                th:nth-child(1), td:nth-child(1) { /* Initiative Name column */
+                    width: 40%;
+                }
+                
+                th:nth-child(3), td:nth-child(3) { /* Status column */
+                    width: 35%;
+                    padding-left: 5px;
+                    padding-right: 5px;
+                }
+                
+                th:nth-child(4), td:nth-child(4), /* Progress column */
+                th:nth-child(5), td:nth-child(5) { /* Next Milestone column */
+                    display: none;
+                }
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="sidebar">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <button class="mobile-close" id="close-sidebar">&times;</button>
             <h2>Filter Initiatives</h2>
             
             <div class="filter-section">
                 <h3>Mission Areas</h3>
-                <div id="mission-areas-filters">
-                    <!-- Mission area filters will be populated here -->
+                <input type="text" class="search-input" id="mission-search" placeholder="Search mission areas...">
+                <div id="mission-area-filters">
+                    <!-- Mission area checkboxes will be added here -->
                 </div>
             </div>
             
@@ -292,12 +396,16 @@
             
             <div class="filter-section">
                 <h3>Tags</h3>
-                <div id="tags-filters">
-                    <!-- Tag filters will be populated here -->
+                <input type="text" class="search-input" id="tag-search" placeholder="Search tags...">
+                <div id="tag-filters">
+                    <!-- Tag checkboxes will be added here -->
                 </div>
             </div>
+            
+            <button class="reset-button" id="reset-filters">Reset All Filters</button>
         </div>
         
+        <!-- Main content -->
         <div class="main-content">
             <h1>Government Initiatives Dashboard</h1>
             
@@ -305,21 +413,21 @@
                 <p>This dashboard shows major government initiatives like a flight schedule – you can click any initiative to see its full plan, including objectives and progress updates.</p>
                 <div class="legend">
                     <div class="legend-item">
-                        <div class="status-indicator status-planned"></div>
+                        <div class="status-dot status-planned"></div>
                         <span>Planned</span>
                     </div>
                     <div class="legend-item">
-                        <div class="status-indicator status-in-progress"></div>
+                        <div class="status-dot status-in-progress"></div>
                         <span>In Progress</span>
                     </div>
                     <div class="legend-item">
-                        <div class="status-indicator status-completed"></div>
+                        <div class="status-dot status-completed"></div>
                         <span>Completed</span>
                     </div>
                 </div>
             </div>
             
-            <table class="initiatives-table">
+            <table>
                 <thead>
                     <tr>
                         <th>Initiative Name</th>
@@ -329,56 +437,58 @@
                         <th>Next Milestone</th>
                     </tr>
                 </thead>
-                <tbody id="initiatives-table-body">
-                    <!-- Initiative data will be populated here -->
+                <tbody id="initiatives-tbody">
+                    <!-- Table rows will be added here -->
                 </tbody>
             </table>
             
-            <div class="initiative-details" id="initiative-details" style="display: none;">
+            <!-- Initiative details panel -->
+            <div class="initiative-details" id="initiative-details">
                 <h2>
-                    <span id="detail-title">Initiative Title</span>
-                    <button class="close-button" id="close-details">×</button>
+                    <span id="detail-title"></span>
+                    <button class="close-button" id="close-details">&times;</button>
                 </h2>
-                <div class="subtitle" id="detail-subtitle">Mission Area · Status</div>
+                <div class="subtitle" id="detail-subtitle"></div>
                 
-                <div class="detail-grid">
-                    <div class="detail-section">
-                        <h3>Vision</h3>
-                        <p id="detail-vision"></p>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h3>Initial State</h3>
-                        <p id="detail-initial-state"></p>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h3>Objectives</h3>
-                        <ul id="detail-objectives"></ul>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h3>Roadmap</h3>
-                        <ul id="detail-roadmap"></ul>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h3>Current Status</h3>
-                        <p id="detail-current-status"></p>
-                        <p><strong>Progress:</strong> <span id="detail-progress"></span></p>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <h3>Tags</h3>
-                        <div class="tags-container" id="detail-tags"></div>
-                    </div>
+                <div class="detail-section">
+                    <h3>Vision</h3>
+                    <p id="detail-vision"></p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Initial State</h3>
+                    <p id="detail-initial-state"></p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Objectives</h3>
+                    <ul id="detail-objectives"></ul>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Roadmap</h3>
+                    <ul id="detail-roadmap"></ul>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Current Status</h3>
+                    <p id="detail-current-status"></p>
+                    <p><strong>Progress:</strong> <span id="detail-progress"></span></p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Tags</h3>
+                    <div class="tags-container" id="detail-tags"></div>
                 </div>
             </div>
         </div>
     </div>
-
+    
+    <!-- Mobile filter toggle button -->
+    <button class="mobile-filter-toggle" id="mobile-filter-toggle">&#9776;</button>
+    
     <script>
-        // Sample data for initiatives
+        // Sample data
         const initiatives = [
             {
                 name: "Dismantle DEI Act",
@@ -446,143 +556,260 @@
                 tags: ["Civil Rights", "Government Operations", "Human Resources"]
             }
         ];
-
-        // DOM Elements
-        const initiativesTableBody = document.getElementById('initiatives-table-body');
-        const initiativeDetails = document.getElementById('initiative-details');
-        const closeDetailsButton = document.getElementById('close-details');
-        const missionAreasFilters = document.getElementById('mission-areas-filters');
-        const tagsFilters = document.getElementById('tags-filters');
         
         // Extract unique mission areas and tags
-        const uniqueMissionAreas = [...new Set(initiatives.map(initiative => initiative.missionArea))];
-        const uniqueTags = [...new Set(initiatives.flatMap(initiative => initiative.tags || []))];
-
+        const missionAreas = [...new Set(initiatives.map(item => item.missionArea))];
+        const allTags = [...new Set(initiatives.flatMap(item => item.tags))];
+        
+        // DOM elements
+        const initiativesTable = document.getElementById('initiatives-tbody');
+        const missionAreaFilters = document.getElementById('mission-area-filters');
+        const tagFilters = document.getElementById('tag-filters');
+        const missionSearch = document.getElementById('mission-search');
+        const tagSearch = document.getElementById('tag-search');
+        const resetButton = document.getElementById('reset-filters');
+        const detailsPanel = document.getElementById('initiative-details');
+        
+        // Mobile elements
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-filter-toggle');
+        const closeSidebar = document.getElementById('close-sidebar');
+        
         // Initialize the dashboard
-        function initDashboard() {
-            // Build the sidebar filters first
-            populateMissionAreaFilters();
-            populateTagFilters();
-            setupEventListeners();
+        function init() {
+            // Create mission area filters
+            missionAreas.forEach(area => {
+                const item = document.createElement('div');
+                item.className = 'checkbox-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="mission-${area.replace(/\s+/g, '-').toLowerCase()}" 
+                           value="${area}" checked>
+                    <label for="mission-${area.replace(/\s+/g, '-').toLowerCase()}">${area}</label>
+                `;
+                missionAreaFilters.appendChild(item);
+                
+                // Add event listener to the checkbox
+                const checkbox = item.querySelector('input');
+                checkbox.addEventListener('change', updateTable);
+            });
             
-            // Then populate the table with all initiatives
-            populateInitiativesTable();
+            // Create tag filters
+            allTags.forEach(tag => {
+                const item = document.createElement('div');
+                item.className = 'checkbox-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="tag-${tag.replace(/\s+/g, '-').toLowerCase()}" 
+                           value="${tag}">
+                    <label for="tag-${tag.replace(/\s+/g, '-').toLowerCase()}">${tag}</label>
+                `;
+                tagFilters.appendChild(item);
+                
+                // Add event listener to the checkbox
+                const checkbox = item.querySelector('input');
+                checkbox.addEventListener('change', updateTable);
+            });
             
-            // Add a debugging message to console
-            console.log('Dashboard initialized with', initiatives.length, 'initiatives');
-            console.log('Mission Areas:', uniqueMissionAreas);
-            console.log('Tags:', uniqueTags);
+            // Add event listeners to status filters
+            document.querySelectorAll('#status-filters input').forEach(checkbox => {
+                checkbox.addEventListener('change', updateTable);
+            });
+            
+            // Add event listeners for search boxes
+            missionSearch.addEventListener('input', filterMissionAreas);
+            tagSearch.addEventListener('input', filterTags);
+            
+            // Reset button
+            resetButton.addEventListener('click', resetFilters);
+            
+            // Mobile toggle
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.add('mobile-visible');
+            });
+            
+            // Close sidebar
+            closeSidebar.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-visible');
+            });
+            
+            // Close details
+            document.getElementById('close-details').addEventListener('click', () => {
+                detailsPanel.style.display = 'none';
+            });
+            
+            // Initial table population
+            updateTable();
         }
-
-        // Format status with color indicator
-        function formatStatus(status) {
-            let statusClass = '';
-            let textClass = '';
+        
+        // Update the table based on current filters
+        function updateTable() {
+            // Get selected values
+            const selectedMissionAreas = Array.from(
+                document.querySelectorAll('#mission-area-filters input:checked')
+            ).map(checkbox => checkbox.value);
             
-            if (status === 'Planned') {
-                statusClass = 'status-planned';
-                textClass = 'planned-text';
-            } else if (status === 'In Progress') {
-                statusClass = 'status-in-progress';
-                textClass = 'in-progress-text';
-            } else if (status === 'Completed') {
-                statusClass = 'status-completed';
-                textClass = 'completed-text';
+            const selectedStatuses = [];
+            if (document.getElementById('status-planned').checked) selectedStatuses.push('Planned');
+            if (document.getElementById('status-in-progress').checked) selectedStatuses.push('In Progress');
+            if (document.getElementById('status-completed').checked) selectedStatuses.push('Completed');
+            
+            const selectedTags = Array.from(
+                document.querySelectorAll('#tag-filters input:checked')
+            ).map(checkbox => checkbox.value);
+            
+            // Apply filters
+            const filteredInitiatives = initiatives.filter(initiative => {
+                // Mission area filter
+                const missionMatch = selectedMissionAreas.length === 0 || 
+                                    selectedMissionAreas.includes(initiative.missionArea);
+                
+                // Status filter
+                const statusMatch = selectedStatuses.length === 0 || 
+                                   selectedStatuses.includes(initiative.status);
+                
+                // Tag filter - show if any selected tag matches any initiative tag
+                const tagMatch = selectedTags.length === 0 || 
+                               (initiative.tags && initiative.tags.some(tag => selectedTags.includes(tag)));
+                
+                return missionMatch && statusMatch && tagMatch;
+            });
+            
+            // Clear the table
+            initiativesTable.innerHTML = '';
+            
+            // Add filtered initiatives to table
+            if (filteredInitiatives.length === 0) {
+                initiativesTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No initiatives match your filters.</td>
+                    </tr>
+                `;
+            } else {
+                filteredInitiatives.forEach(initiative => {
+                    const row = document.createElement('tr');
+                    
+                    // Format status with color
+                    let statusClass = '';
+                    let textClass = '';
+                    
+                    if (initiative.status === 'Planned') {
+                        statusClass = 'status-planned';
+                        textClass = 'planned-text';
+                    } else if (initiative.status === 'In Progress') {
+                        statusClass = 'status-in-progress';
+                        textClass = 'in-progress-text';
+                    } else if (initiative.status === 'Completed') {
+                        statusClass = 'status-completed';
+                        textClass = 'completed-text';
+                    }
+                    
+                    // Format progress bar
+                    const progressValue = parseInt(initiative.progress);
+                    let progressColor = '#ccc';
+                    
+                    if (initiative.status === 'Planned') {
+                        progressColor = '#f39c12'; // Warning color
+                    } else if (initiative.status === 'In Progress') {
+                        progressColor = '#3498db'; // Info color
+                    } else if (initiative.status === 'Completed') {
+                        progressColor = '#2ecc71'; // Success color
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${initiative.name}</td>
+                        <td>${initiative.missionArea}</td>
+                        <td>
+                            <div class="status-cell">
+                                <div class="status-dot ${statusClass}"></div>
+                                <span class="${textClass}">${initiative.status}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: ${progressValue}%; background-color: ${progressColor};"></div>
+                            </div>
+                            <span>${initiative.progress}</span>
+                        </td>
+                        <td>${initiative.nextMilestone}</td>
+                    `;
+                    
+                    // Add click event to show details
+                    row.addEventListener('click', () => showDetails(initiative));
+                    
+                    initiativesTable.appendChild(row);
+                });
             }
             
-            return `
-                <div class="status-cell">
-                    <div class="status-indicator ${statusClass}"></div>
-                    <span class="${textClass}">${status}</span>
-                </div>
-            `;
+            // Hide details panel when filters change
+            detailsPanel.style.display = 'none';
         }
-
-        // Format progress bar
-        function formatProgressBar(progress, status) {
-            const progressValue = parseInt(progress);
-            let color = '#ccc';
+        
+        // Filter mission areas based on search input
+        function filterMissionAreas() {
+            const searchTerm = missionSearch.value.toLowerCase();
+            const items = missionAreaFilters.querySelectorAll('.checkbox-item');
             
-            if (status === 'Planned') {
-                color = '#f39c12'; // Warning color
-            } else if (status === 'In Progress') {
-                color = '#3498db'; // Info color
-            } else if (status === 'Completed') {
-                color = '#2ecc71'; // Success color
-            }
-            
-            return `
-                <div class="progress-bar">
-                    <div class="progress-value" style="width: ${progressValue}%; background-color: ${color};"></div>
-                </div>
-                <span>${progress}</span>
-            `;
-        }
-
-        // Populate initiatives table
-        function populateInitiativesTable() {
-            initiativesTableBody.innerHTML = '';
-            
-            initiatives.forEach(initiative => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${initiative.name}</td>
-                    <td>${initiative.missionArea}</td>
-                    <td>${formatStatus(initiative.status)}</td>
-                    <td>${formatProgressBar(initiative.progress, initiative.status)}</td>
-                    <td>${initiative.nextMilestone}</td>
-                `;
-                
-                row.addEventListener('click', () => showInitiativeDetails(initiative));
-                initiativesTableBody.appendChild(row);
+            items.forEach(item => {
+                const label = item.querySelector('label').textContent.toLowerCase();
+                if (label.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
             });
         }
-
-        // Populate mission area filters
-        function populateMissionAreaFilters() {
-            missionAreasFilters.innerHTML = '';
+        
+        // Filter tags based on search input
+        function filterTags() {
+            const searchTerm = tagSearch.value.toLowerCase();
+            const items = tagFilters.querySelectorAll('.checkbox-item');
             
-            uniqueMissionAreas.forEach(area => {
-                const checkbox = document.createElement('div');
-                checkbox.className = 'checkbox-item';
-                const id = `mission-${area.replace(/\s+/g, '-').toLowerCase()}`;
-                
-                checkbox.innerHTML = `
-                    <input type="checkbox" id="${id}" checked>
-                    <label for="${id}">${area}</label>
-                `;
-                missionAreasFilters.appendChild(checkbox);
-                
-                // Ensure the checkbox has a change event listener
-                const checkboxInput = checkbox.querySelector('input');
-                checkboxInput.addEventListener('change', filterInitiatives);
+            items.forEach(item => {
+                const label = item.querySelector('label').textContent.toLowerCase();
+                if (label.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
             });
         }
-
-        // Populate tag filters
-        function populateTagFilters() {
-            tagsFilters.innerHTML = '';
-            
-            uniqueTags.forEach(tag => {
-                const checkbox = document.createElement('div');
-                checkbox.className = 'checkbox-item';
-                const id = `tag-${tag.replace(/\s+/g, '-').toLowerCase()}`;
-                
-                checkbox.innerHTML = `
-                    <input type="checkbox" id="${id}">
-                    <label for="${id}">${tag}</label>
-                `;
-                tagsFilters.appendChild(checkbox);
-                
-                // Ensure the checkbox has a change event listener
-                const checkboxInput = checkbox.querySelector('input');
-                checkboxInput.addEventListener('change', filterInitiatives);
+        
+        // Reset all filters
+        function resetFilters() {
+            // Check all mission areas
+            missionAreaFilters.querySelectorAll('input').forEach(checkbox => {
+                checkbox.checked = true;
             });
+            
+            // Check all statuses
+            document.querySelectorAll('#status-filters input').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            // Uncheck all tags
+            tagFilters.querySelectorAll('input').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Clear search boxes
+            missionSearch.value = '';
+            tagSearch.value = '';
+            
+            // Reset visibility
+            missionAreaFilters.querySelectorAll('.checkbox-item').forEach(item => {
+                item.style.display = 'flex';
+            });
+            
+            tagFilters.querySelectorAll('.checkbox-item').forEach(item => {
+                item.style.display = 'flex';
+            });
+            
+            // Update table
+            updateTable();
         }
-
+        
         // Show initiative details
-        function showInitiativeDetails(initiative) {
-            // Set initiative details
+        function showDetails(initiative) {
+            // Set details
             document.getElementById('detail-title').textContent = initiative.name;
             document.getElementById('detail-subtitle').textContent = `${initiative.missionArea} · ${initiative.status}`;
             document.getElementById('detail-vision').textContent = initiative.vision;
@@ -590,7 +817,7 @@
             document.getElementById('detail-current-status').textContent = initiative.currentStatus;
             document.getElementById('detail-progress').textContent = initiative.progress;
             
-            // Set objectives
+            // Clear and populate objectives
             const objectivesList = document.getElementById('detail-objectives');
             objectivesList.innerHTML = '';
             initiative.objectives.forEach(objective => {
@@ -599,7 +826,7 @@
                 objectivesList.appendChild(li);
             });
             
-            // Set roadmap
+            // Clear and populate roadmap
             const roadmapList = document.getElementById('detail-roadmap');
             roadmapList.innerHTML = '';
             initiative.roadmap.forEach(step => {
@@ -608,7 +835,7 @@
                 roadmapList.appendChild(li);
             });
             
-            // Set tags
+            // Clear and populate tags
             const tagsContainer = document.getElementById('detail-tags');
             tagsContainer.innerHTML = '';
             if (initiative.tags && initiative.tags.length > 0) {
@@ -622,140 +849,20 @@
                 tagsContainer.innerHTML = '<span>No tags assigned</span>';
             }
             
-            // Show details panel
-            initiativeDetails.style.display = 'block';
+            // Show panel
+            detailsPanel.style.display = 'block';
+            
+            // Scroll to details
+            detailsPanel.scrollIntoView({ behavior: 'smooth' });
         }
-
-        // Filter initiatives based on selected filters
-        function filterInitiatives() {
-            const selectedMissionAreas = [];
-            const selectedStatuses = [];
-            const selectedTags = [];
-            
-            // Get selected mission areas
-            document.querySelectorAll('#mission-areas-filters input:checked').forEach(checkbox => {
-                const areaId = checkbox.id.replace('mission-', '').replace(/-/g, ' ');
-                const capitalizedArea = areaId.split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
-                selectedMissionAreas.push(capitalizedArea);
-            });
-            
-            // Get selected statuses
-            document.querySelectorAll('#status-filters input:checked').forEach(checkbox => {
-                if (checkbox.id === 'status-planned') selectedStatuses.push('Planned');
-                if (checkbox.id === 'status-in-progress') selectedStatuses.push('In Progress');
-                if (checkbox.id === 'status-completed') selectedStatuses.push('Completed');
-            });
-            
-            // Get selected tags
-            document.querySelectorAll('#tags-filters input:checked').forEach(checkbox => {
-                const tagId = checkbox.id.replace('tag-', '').replace(/-/g, ' ');
-                const capitalizedTag = tagId.split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
-                selectedTags.push(capitalizedTag);
-            });
-            
-            // Debug logging
-            console.log('Selected Mission Areas:', selectedMissionAreas);
-            console.log('Selected Statuses:', selectedStatuses);
-            console.log('Selected Tags:', selectedTags);
-            
-            // Filter initiatives
-            const filteredInitiatives = initiatives.filter(initiative => {
-                const missionAreaMatch = selectedMissionAreas.length === 0 || 
-                                        selectedMissionAreas.includes(initiative.missionArea);
-                
-                const statusMatch = selectedStatuses.length === 0 || 
-                                   selectedStatuses.includes(initiative.status);
-                
-                const tagMatch = selectedTags.length === 0 || 
-                               (initiative.tags && initiative.tags.some(tag => selectedTags.includes(tag)));
-                
-                return missionAreaMatch && statusMatch && (selectedTags.length === 0 || tagMatch);
-            });
-            
-            console.log('Filtered Initiatives:', filteredInitiatives);
-            
-            // Update table with filtered initiatives
-            initiativesTableBody.innerHTML = '';
-            
-            if (filteredInitiatives.length === 0) {
-                // Show a message when no initiatives match the filters
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="5" style="text-align: center; padding: 20px;">
-                        No initiatives match the selected filters. Try adjusting your filter criteria.
-                    </td>
-                `;
-                initiativesTableBody.appendChild(row);
-            } else {
-                // Populate with filtered initiatives
-                filteredInitiatives.forEach(initiative => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${initiative.name}</td>
-                        <td>${initiative.missionArea}</td>
-                        <td>${formatStatus(initiative.status)}</td>
-                        <td>${formatProgressBar(initiative.progress, initiative.status)}</td>
-                        <td>${initiative.nextMilestone}</td>
-                    `;
-                    
-                    row.addEventListener('click', () => showInitiativeDetails(initiative));
-                    initiativesTableBody.appendChild(row);
-                });
-            }
+        
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Also initialize immediately if DOM is already loaded
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(init, 1);
         }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            // Close details panel
-            closeDetailsButton.addEventListener('click', () => {
-                initiativeDetails.style.display = 'none';
-            });
-            
-            // Set up status filter checkboxes
-            const statusCheckboxes = document.querySelectorAll('#status-filters input[type="checkbox"]');
-            statusCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', filterInitiatives);
-            });
-            
-            // Add reset button
-            const sidebar = document.querySelector('.sidebar');
-            const resetButton = document.createElement('button');
-            resetButton.textContent = 'Reset All Filters';
-            resetButton.style.marginTop = '20px';
-            resetButton.style.padding = '8px 16px';
-            resetButton.style.backgroundColor = '#e74c3c';
-            resetButton.style.color = 'white';
-            resetButton.style.border = 'none';
-            resetButton.style.borderRadius = '4px';
-            resetButton.style.cursor = 'pointer';
-            resetButton.style.width = '100%';
-            
-            resetButton.addEventListener('click', () => {
-                // Reset all checkboxes
-                const allCheckboxes = document.querySelectorAll('.sidebar input[type="checkbox"]');
-                allCheckboxes.forEach(cb => {
-                    if (cb.id.startsWith('mission-')) {
-                        cb.checked = true; // Check all mission areas
-                    } else if (cb.id.startsWith('status-')) {
-                        cb.checked = true; // Check all statuses
-                    } else if (cb.id.startsWith('tag-')) {
-                        cb.checked = false; // Uncheck all tags
-                    }
-                });
-                
-                // Re-apply filters
-                filterInitiatives();
-            });
-            
-            sidebar.appendChild(resetButton);
-        }
-
-        // Initialize dashboard when page loads
-        document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
 </html>
